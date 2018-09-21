@@ -24,7 +24,7 @@ public class AirSpeaker {
 
     public static void main(String[] args) {
         if (!SystemTray.isSupported()) {
-            JOptionPane.showMessageDialog(null, "System tray not supported!", "Error", JOptionPane.ERROR_MESSAGE);
+            showError("System tray not supported!");
             return;
         }
 
@@ -32,7 +32,7 @@ public class AirSpeaker {
         try {
             speaker.createSystemTray();
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+            showError(e.toString());
         }
     }
 
@@ -54,10 +54,10 @@ public class AirSpeaker {
                         airPlayItem.setEnabled(false);
                         shairPlayItem.setEnabled(true);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Failed to start", "Error", JOptionPane.ERROR_MESSAGE);
+                        showError("Failed to start!");
                     }
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, ex.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+                    showError(ex.toString());
                 }
             }
         });
@@ -70,10 +70,10 @@ public class AirSpeaker {
                         airPlayItem.setEnabled(true);
                         shairPlayItem.setEnabled(false);
                     } else {
-                        JOptionPane.showMessageDialog(null, "Failed to start", "Error", JOptionPane.ERROR_MESSAGE);
+                        showError("Failed to start!");
                     }
                 } catch (IOException ex) {
-                    JOptionPane.showMessageDialog(null, ex.toString(), "Error", JOptionPane.ERROR_MESSAGE);
+                    showError(ex.toString());
                 }
             }
         });
@@ -89,7 +89,7 @@ public class AirSpeaker {
         });
         popup.add(exitItem);
 
-        // Create the tray
+        // Create the app tray
         Image logo = new ImageIcon(Thread.currentThread().getContextClassLoader().getResource("speaker.png")).getImage();
         TrayIcon trayIcon = new TrayIcon(logo, "Switch speaker", popup);
         trayIcon.setImageAutoSize(true);
@@ -100,16 +100,16 @@ public class AirSpeaker {
     }
 
     private boolean startAirPlay(String host, Integer port, String username, String password) throws IOException {
-        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /data/" + " && ./airplay.sh");
-        if (output.contains("")) {
+        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./airplay.sh");
+        if (output.contains("Stopping shairplay")) {
             return true;
         }
         return false;
     }
 
     private boolean startShairPlay(String host, Integer port, String username, String password) throws IOException {
-        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /data/" + " && ./shairplay.sh");
-        if (output.contains("")) {
+        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./shairplay.sh");
+        if (output.contains("Restarting shairplay")) {
             return true;
         }
         return false;
@@ -117,5 +117,9 @@ public class AirSpeaker {
 
     private Shell createShell(String host, Integer port, String username, String password) throws UnknownHostException {
         return new SshByPassword(host, port, username, password);
+    }
+
+    private static void showError(String message) {
+        JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 }
