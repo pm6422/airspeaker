@@ -21,7 +21,6 @@ public class AirSpeaker {
     private String USERNAME = "pi";
     private String PASSWORD = "raspberry";
 
-
     public static void main(String[] args) {
         if (!SystemTray.isSupported()) {
             showError("System tray not supported!");
