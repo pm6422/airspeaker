@@ -5,7 +5,7 @@
     <artifactId>airspeaker</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
-    <name>Air Speaker</name>
+    <name>AirSpeaker</name>
     <url>http://maven.apache.org</url>
     <properties>
         <file.encoding>UTF-8</file.encoding>
