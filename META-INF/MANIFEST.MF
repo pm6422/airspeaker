@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Built-By: Louis
+Build-Jdk: 1.8.0_111
+Created-By: Apache Maven 3.1.0
+Archiver-Version: Plexus Archiver
+Main-Class: org.infinity.airspeaker.AirSpeaker
+
