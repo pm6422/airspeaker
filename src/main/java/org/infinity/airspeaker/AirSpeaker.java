@@ -8,6 +8,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.IOException;
 import java.net.UnknownHostException;
 
@@ -45,44 +47,54 @@ public class AirSpeaker {
 
         popup.addSeparator();
 
-        final MenuItem airPlayItem = new MenuItem("AirPlay Speaker");
-        final MenuItem shairPlayItem = new MenuItem("ShairPlay Speaker");
+        final CheckboxMenuItem airPlayItem = new CheckboxMenuItem("AirPlay Speaker");
+        final CheckboxMenuItem shairPlayItem = new CheckboxMenuItem("ShairPlay Speaker");
 
         popup.add(airPlayItem);
         popup.add(shairPlayItem);
 
-        airPlayItem.addActionListener(new ActionListener() {
+        airPlayItem.addItemListener(new ItemListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
+            public void itemStateChanged(ItemEvent event) {
                 try {
+                    airPlayItem.setState(true);
                     airPlayItem.setEnabled(false);
                     if (startAirPlay(HOST, PORT, USERNAME, PASSWORD)) {
+                        airPlayItem.setState(true);
                         airPlayItem.setEnabled(false);
+                        shairPlayItem.setState(false);
                         shairPlayItem.setEnabled(true);
                     } else {
+                        airPlayItem.setState(false);
                         airPlayItem.setEnabled(true);
                         showError("Failed to start!");
                     }
                 } catch (IOException ex) {
+                    airPlayItem.setState(false);
                     airPlayItem.setEnabled(true);
                     showError(ex.toString());
                 }
             }
         });
 
-        shairPlayItem.addActionListener(new ActionListener() {
+        shairPlayItem.addItemListener(new ItemListener() {
             @Override
-            public void actionPerformed(ActionEvent event) {
+            public void itemStateChanged(ItemEvent event) {
                 try {
+                    shairPlayItem.setState(true);
                     shairPlayItem.setEnabled(false);
                     if (startShairPlay(HOST, PORT, USERNAME, PASSWORD)) {
+                        airPlayItem.setState(false);
                         airPlayItem.setEnabled(true);
+                        shairPlayItem.setState(true);
                         shairPlayItem.setEnabled(false);
                     } else {
+                        shairPlayItem.setState(false);
                         shairPlayItem.setEnabled(true);
                         showError("Failed to start!");
                     }
                 } catch (IOException ex) {
+                    shairPlayItem.setState(false);
                     shairPlayItem.setEnabled(true);
                     showError(ex.toString());
                 }
@@ -130,11 +142,13 @@ public class AirSpeaker {
         JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    private void disabledMenuItem(MenuItem airPlayItem, MenuItem shairPlayItem) throws IOException {
+    private void disabledMenuItem(CheckboxMenuItem airPlayItem, CheckboxMenuItem shairPlayItem) throws IOException {
         if (isAirPlayRunning()) {
+            airPlayItem.setState(true);
             airPlayItem.setEnabled(false);
         }
         if (isShairPlayRunning()) {
+            shairPlayItem.setState(true);
             shairPlayItem.setEnabled(false);
         }
     }
