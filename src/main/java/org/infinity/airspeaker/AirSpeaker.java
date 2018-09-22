@@ -16,10 +16,10 @@ import java.net.UnknownHostException;
  */
 public class AirSpeaker {
 
-    private String HOST     = "192.168.50.230";
-    private int    PORT     = 22;
-    private String USERNAME = "pi";
-    private String PASSWORD = "raspberry";
+    private static final String HOST     = "192.168.50.230";
+    private static final int    PORT     = 22;
+    private static final String USERNAME = "pi";
+    private static final String PASSWORD = "raspberry";
 
     public static void main(String[] args) {
         if (!SystemTray.isSupported()) {
@@ -35,9 +35,15 @@ public class AirSpeaker {
         }
     }
 
-    private void createSystemTray() throws AWTException {
+    private void createSystemTray() throws AWTException, IOException {
         // Create context menus
         PopupMenu popup = new PopupMenu();
+
+        final MenuItem versionItem = new MenuItem("Air Speaker v1.00");
+        versionItem.setEnabled(false);
+        popup.add(versionItem);
+
+        popup.addSeparator();
 
         final MenuItem airPlayItem = new MenuItem("AirPlay Speaker");
         final MenuItem shairPlayItem = new MenuItem("ShairPlay Speaker");
@@ -49,13 +55,16 @@ public class AirSpeaker {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
+                    airPlayItem.setEnabled(false);
                     if (startAirPlay(HOST, PORT, USERNAME, PASSWORD)) {
                         airPlayItem.setEnabled(false);
                         shairPlayItem.setEnabled(true);
                     } else {
+                        airPlayItem.setEnabled(true);
                         showError("Failed to start!");
                     }
                 } catch (IOException ex) {
+                    airPlayItem.setEnabled(true);
                     showError(ex.toString());
                 }
             }
@@ -65,13 +74,16 @@ public class AirSpeaker {
             @Override
             public void actionPerformed(ActionEvent event) {
                 try {
+                    shairPlayItem.setEnabled(false);
                     if (startShairPlay(HOST, PORT, USERNAME, PASSWORD)) {
                         airPlayItem.setEnabled(true);
                         shairPlayItem.setEnabled(false);
                     } else {
+                        shairPlayItem.setEnabled(true);
                         showError("Failed to start!");
                     }
                 } catch (IOException ex) {
+                    shairPlayItem.setEnabled(true);
                     showError(ex.toString());
                 }
             }
@@ -96,22 +108,18 @@ public class AirSpeaker {
         // Add to system tray
         SystemTray tray = SystemTray.getSystemTray();
         tray.add(trayIcon);
+
+        disabledMenuItem(airPlayItem, shairPlayItem);
     }
 
     private boolean startAirPlay(String host, Integer port, String username, String password) throws IOException {
-        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./airplay.sh");
-        if (output.contains("Stopping shairplay")) {
-            return true;
-        }
-        return false;
+        new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./airplay.sh");
+        return isAirPlayRunning();
     }
 
     private boolean startShairPlay(String host, Integer port, String username, String password) throws IOException {
-        String output = new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./shairplay.sh");
-        if (output.contains("Restarting shairplay")) {
-            return true;
-        }
-        return false;
+        new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./shairplay.sh");
+        return isShairPlayRunning();
     }
 
     private Shell createShell(String host, Integer port, String username, String password) throws UnknownHostException {
@@ -120,5 +128,24 @@ public class AirSpeaker {
 
     private static void showError(String message) {
         JOptionPane.showMessageDialog(null, message, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    private void disabledMenuItem(MenuItem airPlayItem, MenuItem shairPlayItem) throws IOException {
+        if (isAirPlayRunning()) {
+            airPlayItem.setEnabled(false);
+        }
+        if (isShairPlayRunning()) {
+            shairPlayItem.setEnabled(false);
+        }
+    }
+
+    private boolean isAirPlayRunning() throws IOException {
+        String output = new Shell.Plain(createShell(HOST, PORT, USERNAME, PASSWORD)).exec("docker ps");
+        return output.contains("airplay");
+    }
+
+    private boolean isShairPlayRunning() throws IOException {
+        String output = new Shell.Plain(createShell(HOST, PORT, USERNAME, PASSWORD)).exec("ps -ef | grep shairplay");
+        return output.contains("shairplay -a ShairPlay Speaker");
     }
 }
