@@ -125,12 +125,12 @@ public class AirSpeaker {
     }
 
     private boolean startAirPlay(String host, Integer port, String username, String password) throws IOException {
-        new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./airplay.sh");
+        new Shell.Plain(createShell(host, port, username, password)).exec("sudo /etc/init.d/shairplay stop && sudo docker restart airplay");
         return isAirPlayRunning();
     }
 
     private boolean startShairPlay(String host, Integer port, String username, String password) throws IOException {
-        new Shell.Plain(createShell(host, port, username, password)).exec("cd /usr/data/ && sudo bash ./shairplay.sh");
+        new Shell.Plain(createShell(host, port, username, password)).exec("sudo docker stop airplay && sudo /etc/init.d/shairplay restart");
         return isShairPlayRunning();
     }
 
@@ -154,7 +154,7 @@ public class AirSpeaker {
     }
 
     private boolean isAirPlayRunning() throws IOException {
-        String output = new Shell.Plain(createShell(HOST, PORT, USERNAME, PASSWORD)).exec("docker ps");
+        String output = new Shell.Plain(createShell(HOST, PORT, USERNAME, PASSWORD)).exec("sudo docker ps");
         return output.contains("airplay");
     }
 

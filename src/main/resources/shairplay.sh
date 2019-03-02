@@ -1,2 +1,2 @@
 # Start ShairPlay Speaker
-sudo docker stop airplay && /etc/init.d/shairplay restart
+sudo docker stop airplay && sudo /etc/init.d/shairplay restart
