@@ -18,7 +18,7 @@ import java.net.UnknownHostException;
  */
 public class AirSpeaker {
 
-    private static final String HOST     = "10.10.10.222";
+    private static final String HOST     = "10.10.10.40";
     private static final int    PORT     = 22;
     private static final String USERNAME = "pi";
     private static final String PASSWORD = "raspberry";
